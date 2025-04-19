@@ -9,7 +9,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Netflix Recommendation System",
-    description="Kullanıcı izleme tercihlerine göre film/dizi öneri sistemi",
+    description="Movie/Series recommendation system based on user viewing preferences",
     version="1.0.0"
 )
 
@@ -29,4 +29,4 @@ app.include_router(recommendations.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Netflix Recommendation System API'ye Hoş Geldiniz!"} 
+    return {"message": "Welcome to Netflix Recommendation System API!"} 

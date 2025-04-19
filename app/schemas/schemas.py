@@ -2,70 +2,70 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-class TercihBase(BaseModel):
-    tur: str
-    puan: float
+class PreferenceBase(BaseModel):
+    genre: str
+    rating: float
 
-class TercihCreate(TercihBase):
+class PreferenceCreate(PreferenceBase):
     pass
 
-class Tercih(TercihBase):
+class Preference(PreferenceBase):
     id: int
-    kullanici_id: int
+    user_id: int
 
     class Config:
         from_attributes = True
 
-class KullaniciBase(BaseModel):
-    ad: str
+class UserBase(BaseModel):
+    name: str
     email: str
-    yas: int
-    cinsiyet: str
+    age: int
+    gender: str
 
-class KullaniciCreate(KullaniciBase):
+class UserCreate(UserBase):
     pass
 
-class Kullanici(KullaniciBase):
+class User(UserBase):
     id: int
-    tercihler: List[Tercih] = []
+    preferences: List[Preference] = []
 
     class Config:
         from_attributes = True
 
-class FilmBase(BaseModel):
-    ad: str
-    tur: str
-    yil: int
-    imdb_puani: float
+class MovieBase(BaseModel):
+    name: str
+    genre: str
+    year: int
+    imdb_rating: float
 
-class FilmCreate(FilmBase):
+class MovieCreate(MovieBase):
     pass
 
-class Film(FilmBase):
+class Movie(MovieBase):
     id: int
 
     class Config:
         from_attributes = True
 
-class IzlemeBase(BaseModel):
-    kullanici_id: int
-    film_id: int
-    izlenme_suresi: int
+class WatchBase(BaseModel):
+    user_id: int
+    movie_id: int
+    watch_duration: int
 
-class IzlemeCreate(IzlemeBase):
+class WatchCreate(WatchBase):
     pass
 
-class Izleme(IzlemeBase):
+class Watch(WatchBase):
     id: int
-    izleme_tarihi: datetime
+    watch_date: datetime
 
     class Config:
         from_attributes = True
 
 class RecommendationResponse(BaseModel):
-    film_id: int
-    film_adi: str
-    tur: str
-    yil: int
-    imdb_puani: float
-    benzerlik_puani: float 
+    movie_id: int
+    movie_name: str
+    genre: str
+    year: int
+    imdb_rating: float
+    similarity_score: float 

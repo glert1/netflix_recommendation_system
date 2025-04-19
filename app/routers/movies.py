@@ -7,50 +7,50 @@ from ..schemas.schemas import FilmCreate, Film as FilmSchema, IzlemeCreate, Izle
 from datetime import datetime
 
 router = APIRouter(
-    prefix="/filmler",
-    tags=["filmler"]
+    prefix="/movies",
+    tags=["movies"]
 )
 
-@router.post("/", response_model=FilmSchema)
-def create_movie(film: FilmCreate, db: Session = Depends(get_db)):
-    db_film = Film(**film.dict())
-    db.add(db_film)
+@router.post("/", response_model=MovieSchema)
+def create_movie(movie: MovieCreate, db: Session = Depends(get_db)):
+    db_movie = Movie(**movie.dict())
+    db.add(db_movie)
     db.commit()
-    db.refresh(db_film)
-    return db_film
-
-@router.get("/", response_model=List[FilmSchema])
-def read_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    movies = db.query(Film).offset(skip).limit(limit).all()
-    return movies
-
-@router.get("/{movie_id}", response_model=FilmSchema)
-def read_movie(movie_id: int, db: Session = Depends(get_db)):
-    db_movie = db.query(Film).filter(Film.id == movie_id).first()
-    if db_movie is None:
-        raise HTTPException(status_code=404, detail="Film bulunamadı")
+    db.refresh(db_movie)
     return db_movie
 
-@router.post("/izleme/kaydet", response_model=IzlemeSchema)
-def save_watching(izleme: IzlemeCreate, db: Session = Depends(get_db)):
+@router.get("/", response_model=List[MovieSchema])
+def read_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    movies = db.query(Movie).offset(skip).limit(limit).all()
+    return movies
+
+@router.get("/{movie_id}", response_model=MovieSchema)
+def read_movie(movie_id: int, db: Session = Depends(get_db)):
+    db_movie = db.query(Movie).filter(Movie.id == movie_id).first()
+    if db_movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return db_movie
+
+@router.post("/watch/save", response_model=WatchSchema)
+def save_watching(watch: WatchCreate, db: Session = Depends(get_db)):
     # Check if user exists
-    user = db.query(Kullanici).filter(Kullanici.id == izleme.kullanici_id).first()
+    user = db.query(User).filter(User.id == watch.user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+        raise HTTPException(status_code=404, detail="User not found")
     
     # Check if movie exists
-    movie = db.query(Film).filter(Film.id == izleme.film_id).first()
+    movie = db.query(Movie).filter(Movie.id == watch.movie_id).first()
     if not movie:
-        raise HTTPException(status_code=404, detail="Film bulunamadı")
+        raise HTTPException(status_code=404, detail="Movie not found")
     
     # Add movie to user's watched movies
-    user.izlemeler.append(movie)
+    user.watched_movies.append(movie)
     db.commit()
     
-    return IzlemeSchema(
-        id=len(user.izlemeler),
-        kullanici_id=user.id,
-        film_id=movie.id,
-        izleme_tarihi=datetime.utcnow(),
-        izlenme_suresi=izleme.izlenme_suresi
+    return WatchSchema(
+        id=len(user.watched_movies),
+        user_id=user.id,
+        movie_id=movie.id,
+        watch_date=datetime.utcnow(),
+        watch_duration=watch.watch_duration
     ) 

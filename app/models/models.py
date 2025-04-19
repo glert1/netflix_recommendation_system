@@ -5,47 +5,47 @@ from ..database import Base
 
 # Association table for many-to-many relationship between users and movies
 user_movie_association = Table(
-    'izlemeler',
+    'watches',
     Base.metadata,
     Column('id', Integer, primary_key=True, index=True),
-    Column('kullanici_id', Integer, ForeignKey('kullanicilar.id')),
-    Column('film_id', Integer, ForeignKey('filmler.id')),
-    Column('izleme_tarihi', DateTime, default=datetime.utcnow),
-    Column('izlenme_suresi', Integer)  # in minutes
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('movie_id', Integer, ForeignKey('movies.id')),
+    Column('watch_date', DateTime, default=datetime.utcnow),
+    Column('watch_duration', Integer)  # in minutes
 )
 
-class Kullanici(Base):
-    __tablename__ = "kullanicilar"
+class User(Base):
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    ad = Column(String, index=True)
+    name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
-    yas = Column(Integer)
-    cinsiyet = Column(String)
+    age = Column(Integer)
+    gender = Column(String)
     
     # Relationships
-    izlemeler = relationship("Film", secondary=user_movie_association, back_populates="izleyenler")
-    tercihler = relationship("Tercih", back_populates="kullanici")
+    watched_movies = relationship("Movie", secondary=user_movie_association, back_populates="watched_by")
+    preferences = relationship("Preference", back_populates="user")
 
-class Film(Base):
-    __tablename__ = "filmler"
+class Movie(Base):
+    __tablename__ = "movies"
 
     id = Column(Integer, primary_key=True, index=True)
-    ad = Column(String, index=True)
-    tur = Column(String)
-    yil = Column(Integer)
-    imdb_puani = Column(Float)
+    name = Column(String, index=True)
+    genre = Column(String)
+    year = Column(Integer)
+    imdb_rating = Column(Float)
     
     # Relationships
-    izleyenler = relationship("Kullanici", secondary=user_movie_association, back_populates="izlemeler")
+    watched_by = relationship("User", secondary=user_movie_association, back_populates="watched_movies")
 
-class Tercih(Base):
-    __tablename__ = "tercihler"
+class Preference(Base):
+    __tablename__ = "preferences"
 
     id = Column(Integer, primary_key=True, index=True)
-    kullanici_id = Column(Integer, ForeignKey('kullanicilar.id'))
-    tur = Column(String)
-    puan = Column(Float)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    genre = Column(String)
+    rating = Column(Float)
     
     # Relationships
-    kullanici = relationship("Kullanici", back_populates="tercihler") 
+    user = relationship("User", back_populates="preferences") 

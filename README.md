@@ -1,143 +1,142 @@
-#Projeyi Yapanlar
-Gül ERTEN & Tuba SARIKAYA -- GYK1
+# Netflix-Style Movie Recommendation System
 
+## Overview
+This project implements a sophisticated movie recommendation system similar to Netflix, using machine learning algorithms to provide personalized movie suggestions based on user preferences and viewing history. The system is built with FastAPI for the backend, PostgreSQL for data storage, and implements the KMeans clustering algorithm for generating recommendations.
 
+## Features
+- User management system
+- Comprehensive movie database
+- User preference tracking
+- Viewing history management
+- Genre-based recommendations
+- Machine learning-powered suggestion engine
+- RESTful API with Swagger documentation
 
-# Netflix Benzeri Film/Dizi Öneri Sistemi
-
-Bu proje, kullanıcıların izleme geçmişi ve tercihleri doğrultusunda film/dizi önerileri sunan bir API sistemidir. Netflix tarzı bir öneri motoru mantığıyla çalışır ve KMeans kümeleme algoritması kullanarak kişiselleştirilmiş öneriler sunar.
-
-## Özellikler
-
-- Kullanıcı profil yönetimi
-- Film/dizi veritabanı
-- İzleme geçmişi takibi
-- Tür bazlı kullanıcı tercihleri
-- KMeans algoritması ile kişiselleştirilmiş öneriler
-- RESTful API endpoints
-
-## Teknolojiler
-
+## Technical Stack
 - **Backend Framework:** FastAPI
-- **Veritabanı:** PostgreSQL
+- **Database:** PostgreSQL
 - **ORM:** SQLAlchemy
-- **Machine Learning:** scikit-learn (KMeans)
-- **Veri İşleme:** Pandas, NumPy
+- **Machine Learning:** scikit-learn (KMeans clustering)
+- **Data Processing:** Pandas, NumPy
+- **Documentation:** Swagger/OpenAPI
+- **Development Tools:** Python 3.8+
 
-## Kurulum
+## Installation
 
-1. Gerekli Python paketlerini yükleyin:
+### Prerequisites
+- Python 3.8 or higher
+- PostgreSQL 12 or higher
+- pip (Python package manager)
+
+### Setup Steps
+
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd netflix_recommendation_system
+```
+
+2. Install required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. PostgreSQL veritabanını oluşturun:
+3. Set up PostgreSQL database:
 ```sql
 CREATE DATABASE "NetflixRecommendation";
 ```
 
-3. `.env` dosyasını oluşturun ve veritabanı bağlantı bilgilerini ekleyin:
+4. Configure database connection:
+Create a `.env` file in the project root with the following content:
 ```env
-DATABASE_URL=postgresql://postgres:{database şifrenizi buraya yazın}@localhost:5432/NetflixRecommendation
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/NetflixRecommendation
 ```
 
-4. Örnek verileri yükleyin:
+5. Initialize the database with sample data:
 ```bash
 python create_database.py
 ```
+This will create:
+- 1000 sample users
+- 100 movies
+- 3-5 genre preferences per user
+- 10-20 watched movies per user
 
-5. Uygulamayı başlatın:
+## Running the Application
+
+1. Start the FastAPI server:
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8001
 ```
+
+2. Access the API documentation:
+- Swagger UI: http://localhost:8001/docs
+- ReDoc: http://localhost:8001/redoc
 
 ## API Endpoints
 
-### Kullanıcı İşlemleri
-- `GET /kullanici/`: Tüm kullanıcıları listele
-- `GET /kullanici/{user_id}`: Belirli bir kullanıcının bilgilerini getir
-- `POST /kullanici/ekle`: Yeni kullanıcı ekle
+### User Management
+- `GET /users/` - List all users
+- `GET /users/{user_id}` - Get user details
+- `POST /users/create` - Create new user
+- `GET /users/{user_id}/preferences` - Get user preferences
+- `GET /users/{user_id}/watched-movies` - Get user's watch history
 
-### Film İşlemleri
-- `GET /filmler/`: Tüm filmleri listele
-- `GET /filmler/{movie_id}`: Belirli bir filmin bilgilerini getir
-- `POST /filmler/`: Yeni film ekle
-- `POST /filmler/izleme/kaydet`: Film izleme kaydı ekle
+### Movie Management
+- `GET /movies/` - List all movies
+- `GET /movies/{movie_id}` - Get movie details
+- `POST /movies/watch/save` - Record movie watch event
 
-### Öneri Sistemi
-- `GET /recommendations/{user_id}`: Kullanıcıya özel film önerileri al
+### Recommendations
+- `GET /recommendations/{user_id}` - Get personalized movie recommendations
 
-## Kullanım Örnekleri
+## Data Structure
 
-### Yeni Kullanıcı Ekleme
-```json
-POST /kullanici/ekle
-{
-    "ad": "Ahmet Yılmaz",
-    "email": "ahmet@example.com",
-    "yas": 25,
-    "cinsiyet": "Erkek"
-}
-```
+### Users
+- ID
+- Name
+- Email
+- Age
+- Gender
+- Watch History
+- Genre Preferences
 
-### Film İzleme Kaydı Ekleme
-```json
-POST /filmler/izleme/kaydet
-{
-    "kullanici_id": 1,
-    "film_id": 1,
-    "izlenme_suresi": 120
-}
-```
+### Movies
+- ID
+- Name
+- Genre
+- Year
+- IMDB Rating
 
-### Önerileri Görüntüleme
-```
-GET /recommendations/1
-```
+### Preferences
+- User ID
+- Genre
+- Rating
 
-## Veritabanı Şeması
+## Machine Learning Implementation
+The system uses KMeans clustering to group users based on their:
+- Genre preferences
+- Watch history
+- Age demographics
+- Rating patterns
 
-### Kullanicilar Tablosu
-- id (Primary Key)
-- ad
-- email
-- yas
-- cinsiyet
+## Testing
+To test the API using Swagger UI:
+1. Navigate to http://localhost:8001/docs
+2. Try out different endpoints
+3. Use sample user IDs (1-1000)
+4. Explore movie recommendations
+5. Test user preferences and watch history
 
-### Filmler Tablosu
-- id (Primary Key)
-- ad
-- tur
-- yil
-- imdb_puani
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-### Izlemeler Tablosu
-- id (Primary Key)
-- kullanici_id (Foreign Key)
-- film_id (Foreign Key)
-- izleme_tarihi
-- izlenme_suresi
-
-### Tercihler Tablosu
-- id (Primary Key)
-- kullanici_id (Foreign Key)
-- tur
-- puan
-
-## Öneri Algoritması
-
-Sistem, kullanıcıların film tercihleri ve izleme geçmişlerini analiz ederek KMeans kümeleme algoritması ile benzer kullanıcıları gruplar. Her kullanıcı için:
-1. Tür bazlı tercih vektörü oluşturulur
-2. Benzer kullanıcılar kümelenir
-3. Kümedeki diğer kullanıcıların beğendiği ve hedef kullanıcının henüz izlemediği filmler önerilir
-
-## Geliştirme
-
-1. Repository'yi klonlayın
-2. Gerekli paketleri yükleyin
-3. Veritabanını oluşturun
-4. Örnek verileri yükleyin
-5. Uygulamayı başlatın
+## License
+This project is licensed under the MIT License - see the LICENSE file for details
 
 
  

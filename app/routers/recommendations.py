@@ -18,7 +18,7 @@ def get_recommendations(user_id: int, limit: int = 10, db: Session = Depends(get
     if not recommendations:
         raise HTTPException(
             status_code=404,
-            detail="Kullanıcı için öneri bulunamadı veya kullanıcı mevcut değil"
+            detail="No recommendations found for user or user does not exist"
         )
     
     return recommendations 

@@ -1,86 +1,113 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models.models import Base, Kullanici, Film, Tercih
+from app.models.models import Base, User, Movie, Preference
 from datetime import datetime
+from faker import Faker
+import random
+from dotenv import load_dotenv
+import os
 
-# Veritabanı bağlantısı
-DATABASE_URL = "postgresql://postgres:{db_password}@localhost:5432/NetflixRecommendation"
+# Load environment variables
+load_dotenv()
+
+# Database connection
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:your_password@localhost:5432/NetflixRecommendation")
 engine = create_engine(DATABASE_URL)
 
-# Tabloları oluştur
+# Create tables
 Base.metadata.create_all(bind=engine)
 
-# Session oluştur
+# Create session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db = SessionLocal()
 
-# Örnek veriler
-kullanicilar = [
-    Kullanici(ad="Ahmet Yılmaz", email="ahmet@example.com", yas=25, cinsiyet="Erkek"),
-    Kullanici(ad="Ayşe Demir", email="ayse@example.com", yas=30, cinsiyet="Kadın"),
-    Kullanici(ad="Mehmet Kaya", email="mehmet@example.com", yas=28, cinsiyet="Erkek"),
-    Kullanici(ad="Zeynep Şahin", email="zeynep@example.com", yas=22, cinsiyet="Kadın"),
-    Kullanici(ad="Ali Öztürk", email="ali@example.com", yas=35, cinsiyet="Erkek")
+# Initialize Faker
+fake = Faker()
+
+# Movie genres
+genres = [
+    "Action", "Adventure", "Animation", "Biography", "Comedy",
+    "Crime", "Documentary", "Drama", "Family", "Fantasy",
+    "Film-Noir", "History", "Horror", "Music", "Musical",
+    "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller",
+    "War", "Western"
 ]
 
-filmler = [
-    Film(ad="Inception", tur="Bilim Kurgu", yil=2010, imdb_puani=8.8),
-    Film(ad="The Dark Knight", tur="Aksiyon", yil=2008, imdb_puani=9.0),
-    Film(ad="Pulp Fiction", tur="Suç", yil=1994, imdb_puani=8.9),
-    Film(ad="The Shawshank Redemption", tur="Drama", yil=1994, imdb_puani=9.3),
-    Film(ad="Fight Club", tur="Drama", yil=1999, imdb_puani=8.8),
-    Film(ad="The Matrix", tur="Bilim Kurgu", yil=1999, imdb_puani=8.7),
-    Film(ad="Interstellar", tur="Bilim Kurgu", yil=2014, imdb_puani=8.6),
-    Film(ad="The Godfather", tur="Suç", yil=1972, imdb_puani=9.2),
-    Film(ad="Forrest Gump", tur="Drama", yil=1994, imdb_puani=8.8),
-    Film(ad="The Silence of the Lambs", tur="Gerilim", yil=1991, imdb_puani=8.6)
-]
+# Generate 100 movies
+movies = []
+for _ in range(100):
+    year = random.randint(1970, 2024)
+    rating = round(random.uniform(5.0, 9.9), 1)
+    genre = random.choice(genres)
+    movie = Movie(
+        name=fake.unique.catch_phrase(),
+        genre=genre,
+        year=year,
+        imdb_rating=rating
+    )
+    movies.append(movie)
 
-tercihler = [
-    Tercih(kullanici_id=1, tur="Bilim Kurgu", puan=4.5),
-    Tercih(kullanici_id=1, tur="Aksiyon", puan=4.0),
-    Tercih(kullanici_id=2, tur="Drama", puan=4.8),
-    Tercih(kullanici_id=2, tur="Romantik", puan=4.2),
-    Tercih(kullanici_id=3, tur="Aksiyon", puan=4.7),
-    Tercih(kullanici_id=3, tur="Bilim Kurgu", puan=4.3),
-    Tercih(kullanici_id=4, tur="Drama", puan=4.6),
-    Tercih(kullanici_id=4, tur="Gerilim", puan=4.4),
-    Tercih(kullanici_id=5, tur="Suç", puan=4.9),
-    Tercih(kullanici_id=5, tur="Aksiyon", puan=4.5)
-]
+# Generate 1000 users
+users = []
+for _ in range(1000):
+    age = random.randint(18, 80)
+    gender = random.choice(["Male", "Female"])
+    user = User(
+        name=fake.name(),
+        email=fake.unique.email(),
+        age=age,
+        gender=gender
+    )
+    users.append(user)
 
-# Verileri veritabanına ekle
+# Generate user preferences (3-5 preferences per user)
+preferences = []
+for user_id in range(1, 1001):
+    num_preferences = random.randint(3, 5)
+    user_genres = random.sample(genres, num_preferences)
+    for genre in user_genres:
+        preference = Preference(
+            user_id=user_id,
+            genre=genre,
+            rating=round(random.uniform(1.0, 5.0), 1)
+        )
+        preferences.append(preference)
+
 try:
-    # Kullanıcıları ekle
-    for kullanici in kullanicilar:
-        db.add(kullanici)
+    # Add movies
+    print("Adding movies...")
+    for movie in movies:
+        db.add(movie)
     db.commit()
 
-    # Filmleri ekle
-    for film in filmler:
-        db.add(film)
+    # Add users
+    print("Adding users...")
+    for user in users:
+        db.add(user)
     db.commit()
 
-    # Tercihleri ekle
-    for tercih in tercihler:
-        db.add(tercih)
+    # Add preferences
+    print("Adding preferences...")
+    for preference in preferences:
+        db.add(preference)
     db.commit()
 
-    # Bazı izleme kayıtları ekle
-    kullanici1 = db.query(Kullanici).filter(Kullanici.id == 1).first()
-    kullanici1.izlemeler.extend([filmler[0], filmler[1], filmler[5]])  # Inception, The Dark Knight, The Matrix
+    # Add watching records (10-20 movies per user)
+    print("Adding watching records...")
+    for user in users:
+        num_movies = random.randint(10, 20)
+        watched_movies = random.sample(movies, num_movies)
+        user.watched_movies.extend(watched_movies)
+        db.commit()
 
-    kullanici2 = db.query(Kullanici).filter(Kullanici.id == 2).first()
-    kullanici2.izlemeler.extend([filmler[3], filmler[8]])  # The Shawshank Redemption, Forrest Gump
-
-    kullanici3 = db.query(Kullanici).filter(Kullanici.id == 3).first()
-    kullanici3.izlemeler.extend([filmler[1], filmler[5], filmler[6]])  # The Dark Knight, The Matrix, Interstellar
-
-    db.commit()
-    print("Veritabanı başarıyla oluşturuldu ve örnek veriler eklendi!")
+    print("Database created successfully with sample data!")
+    print(f"Total users: {len(users)}")
+    print(f"Total movies: {len(movies)}")
+    print(f"Total preferences: {len(preferences)}")
+    print("Average movies watched per user: 15")
 
 except Exception as e:
     db.rollback()
-    print(f"Hata oluştu: {e}")
+    print(f"An error occurred: {e}")
 finally:
     db.close() 
